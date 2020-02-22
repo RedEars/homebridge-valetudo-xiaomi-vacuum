@@ -136,9 +136,13 @@ class ValetudoXiaomiVacuum {
     this.getConfig(config => {
       if (!config) {
       } else {
-        if (config.spots) {
-          for (let index = 0; index < config.spots.length; index++) {
-            const spot = config.spots[index];
+        if (this.valetudo_config && this.valetudo_config.spots) {
+          for (
+            let index = 0;
+            index < this.valetudo_config.spots.length;
+            index++
+          ) {
+            const spot = this.valetudo_config.spots[index];
             this.spotCleanService = new Service.Switch(
               spot[0] + ", " + this.name,
               "spotclean"
@@ -185,7 +189,7 @@ class ValetudoXiaomiVacuum {
   getConfig(callback) {
     this.sendJSONRequest("http://" + this.ip + "/api/get_config", "GET")
       .then(response => {
-        callback();
+        callback(response);
         this.valetudo_config = response;
       })
       .catch(e => {
