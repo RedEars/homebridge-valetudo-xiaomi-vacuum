@@ -49,7 +49,7 @@ class ValetudoXiaomiVacuum {
     this.status_callbacks = new Array();
     this.current_status_time = null;
     this.status_timer = null;
-    this.valetudo_config = null;
+    this.spots = config.spots;
 
     if (!this.ip) {
       throw new Error("You must provide an ip address of the vacuum cleaner.");
@@ -133,43 +133,22 @@ class ValetudoXiaomiVacuum {
       .on("get", this.getBatteryLow.bind(this));
     this.services.push(this.batteryService);
 
-    this.spotCleanService = new Service.Switch(
-      "Spot Clean, " + this.name,
-      "spotclean"
-    );
-    this.spotCleanService
-      .getCharacteristic(Characteristic.On)
-      .on("set", this.startSpotCleaning.bind(this))
-      .on("get", this.isSpotCleaning.bind(this));
-    this.services.push(this.spotCleanService);
-
-    /*
-    this.getConfig(config => {
-      this.log(`Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`);
-      if (this.valetudo_config && this.valetudo_config.spots) {
-        this.log(
-          `Spots retrieved ${JSON.stringify(this.valetudo_config.spots)}`
+    if (this.spots) {
+      this.log(`Spots retrieved ${JSON.stringify(this.spots)}`);
+      for (let index = 0; index < this.spots.length; index++) {
+        const spot = this.spots[index];
+        this.log(`Add spot ${JSON.stringify(spot)}`);
+        this.spotCleanService = new Service.Switch(
+          spot["name"] + ", " + this.name,
+          "spotclean"
         );
-        for (
-          let index = 0;
-          index < this.valetudo_config.spots.length;
-          index++
-        ) {
-          const spot = this.valetudo_config.spots[index];
-          this.log(`Add spot ${JSON.stringify(spot)}`);
-          this.spotCleanService = new Service.Switch(
-            spot[0] + ", " + this.name,
-            "spotclean"
-          );
-          this.spotCleanService
-            .getCharacteristic(Characteristic.On)
-            .on("set", this.startSpotCleaning.bind(this, spot))
-            .on("get", this.isSpotCleaning.bind(this));
-          this.services.push(this.spotCleanService);
-        }
+        this.spotCleanService
+          .getCharacteristic(Characteristic.On)
+          .on("set", this.startSpotCleaning.bind(this, spot))
+          .on("get", this.isSpotCleaning.bind(this));
+        this.services.push(this.spotCleanService);
       }
-    });
-    */
+    }
 
     this.updateStatus(true);
   }
@@ -595,39 +574,32 @@ class ValetudoXiaomiVacuum {
     });
   }
 
-  startSpotCleaning(state, callback) {
-    this.getConfig(config => {
-      var log = this.log;
-      if (!this.valetudo_config || !this.valetudo_config.spots.length) {
-        callback();
-        return;
-      }
-      var spot = this.valetudo_config.spots[0];
-      if (state) {
-        log(`Executing spot cleaning ${spot}`);
+  startSpotCleaning(state, spot, callback) {
+    var log = this.log;
 
-        this.sendJSONRequest("http://" + this.ip + "/api/spot_clean", "PUT", {
-          x: spot[1],
-          y: spot[2]
+    if (state) {
+      log.debug("Executing spot cleaning");
+
+      this.sendJSONRequest("http://" + this.ip + "/api/go_to", "PUT", {
+        x: spot["x"],
+        y: spot["y"]
+      })
+        .then(response => {
+          setTimeout(() => {
+            callback();
+            this.updateStatus(true);
+          }, 3000);
         })
-          .then(response => {
-            log(response);
-            setTimeout(() => {
-              callback();
-              this.updateStatus(true);
-            }, 3000);
-          })
-          .catch(e => {
-            log.error(`Failed to execute start spot cleaning: ${e}`);
-            setTimeout(() => {
-              callback();
-              this.updateStatus(true);
-            }, 3000);
-          });
-      } else {
-        callback(new Error("Cannot start spot cleaning"));
-      }
-    });
+        .catch(e => {
+          log.error(`Failed to execute start spot cleaning: ${e}`);
+          setTimeout(() => {
+            callback();
+            this.updateStatus(true);
+          }, 3000);
+        });
+    } else {
+      callback(new Error("Cannot start spot cleaning"));
+    }
   }
 
   isSpotCleaning(callback) {
