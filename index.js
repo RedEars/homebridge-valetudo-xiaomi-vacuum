@@ -574,7 +574,7 @@ class ValetudoXiaomiVacuum {
     });
   }
 
-  startSpotCleaning(state, spot, callback) {
+  startSpotCleaning(spot, state, callback) {
     var log = this.log;
 
     if (state) {
