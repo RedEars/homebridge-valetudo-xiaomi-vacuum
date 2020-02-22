@@ -145,6 +145,7 @@ class ValetudoXiaomiVacuum {
           index++
         ) {
           const spot = this.valetudo_config.spots[index];
+          this.log(`Add spot ${JSON.stringify(spot)}`);
           this.spotCleanService = new Service.Switch(
             spot[0] + ", " + this.name,
             "spotclean"
