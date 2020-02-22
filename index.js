@@ -607,8 +607,8 @@ class ValetudoXiaomiVacuum {
         log(`Executing spot cleaning ${spot}`);
 
         this.sendJSONRequest("http://" + this.ip + "/api/spot_clean", "PUT", {
-          x: spot["x"],
-          y: spot["y"]
+          x: spot[1],
+          y: spot[2]
         })
           .then(response => {
             log(response);
