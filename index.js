@@ -133,6 +133,17 @@ class ValetudoXiaomiVacuum {
       .on("get", this.getBatteryLow.bind(this));
     this.services.push(this.batteryService);
 
+    this.spotCleanService = new Service.Switch(
+      "Spot Clean, " + this.name,
+      "spotclean"
+    );
+    this.spotCleanService
+      .getCharacteristic(Characteristic.On)
+      .on("set", this.startSpotCleaning.bind(this))
+      .on("get", this.isSpotCleaning.bind(this));
+    this.services.push(this.spotCleanService);
+
+    /*
     this.getConfig(config => {
       this.log(`Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`);
       if (this.valetudo_config && this.valetudo_config.spots) {
@@ -158,6 +169,7 @@ class ValetudoXiaomiVacuum {
         }
       }
     });
+    */
 
     this.updateStatus(true);
   }
@@ -583,9 +595,12 @@ class ValetudoXiaomiVacuum {
     });
   }
 
-  startSpotCleaning(state, spot, callback) {
+  startSpotCleaning(state, callback) {
     var log = this.log;
-
+    if (!this.valetudo_config || !this.valetudo_config.spots.length) {
+      callback();
+    }
+    var spot = this.valetudo_config.spots[0];
     if (state) {
       log.debug("Executing spot cleaning");
 
