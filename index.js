@@ -596,34 +596,37 @@ class ValetudoXiaomiVacuum {
   }
 
   startSpotCleaning(state, callback) {
-    var log = this.log;
-    if (!this.valetudo_config || !this.valetudo_config.spots.length) {
-      callback();
-    }
-    var spot = this.valetudo_config.spots[0];
-    if (state) {
-      log.debug("Executing spot cleaning");
+    this.getConfig(config => {
+      var log = this.log;
+      if (!this.valetudo_config || !this.valetudo_config.spots.length) {
+        callback();
+        return;
+      }
+      var spot = this.valetudo_config.spots[0];
+      if (state) {
+        log.debug("Executing spot cleaning");
 
-      this.sendJSONRequest("http://" + this.ip + "/api/spot_clean", "PUT", {
-        x: spot["x"],
-        y: spot["y"]
-      })
-        .then(response => {
-          setTimeout(() => {
-            callback();
-            this.updateStatus(true);
-          }, 3000);
+        this.sendJSONRequest("http://" + this.ip + "/api/spot_clean", "PUT", {
+          x: spot["x"],
+          y: spot["y"]
         })
-        .catch(e => {
-          log.error(`Failed to execute start spot cleaning: ${e}`);
-          setTimeout(() => {
-            callback();
-            this.updateStatus(true);
-          }, 3000);
-        });
-    } else {
-      callback(new Error("Cannot start spot cleaning"));
-    }
+          .then(response => {
+            setTimeout(() => {
+              callback();
+              this.updateStatus(true);
+            }, 3000);
+          })
+          .catch(e => {
+            log.error(`Failed to execute start spot cleaning: ${e}`);
+            setTimeout(() => {
+              callback();
+              this.updateStatus(true);
+            }, 3000);
+          });
+      } else {
+        callback(new Error("Cannot start spot cleaning"));
+      }
+    });
   }
 
   isSpotCleaning(callback) {
