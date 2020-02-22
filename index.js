@@ -136,7 +136,13 @@ class ValetudoXiaomiVacuum {
     this.getConfig(config => {
       if (!config) {
       } else {
+        this.log.debug(
+          `Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`
+        );
         if (this.valetudo_config && this.valetudo_config.spots) {
+          this.log.debug(
+            `Spots retrieved ${JSON.stringify(this.valetudo_config.spots)}`
+          );
           for (
             let index = 0;
             index < this.valetudo_config.spots.length;
@@ -187,10 +193,12 @@ class ValetudoXiaomiVacuum {
   }
 
   getConfig(callback) {
+    this.log.debug(`Getting config`);
     this.sendJSONRequest("http://" + this.ip + "/api/get_config", "GET")
       .then(response => {
-        callback(response);
+        this.log.debug(`Config retrieved ${JSON.stringify(response)}`);
         this.valetudo_config = response;
+        callback(response);
       })
       .catch(e => {
         this.log.error(`Failed to get config: ${e}`);
