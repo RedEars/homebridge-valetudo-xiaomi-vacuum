@@ -604,13 +604,14 @@ class ValetudoXiaomiVacuum {
       }
       var spot = this.valetudo_config.spots[0];
       if (state) {
-        log.debug("Executing spot cleaning");
+        log(`Executing spot cleaning ${spot}`);
 
         this.sendJSONRequest("http://" + this.ip + "/api/spot_clean", "PUT", {
           x: spot["x"],
           y: spot["y"]
         })
           .then(response => {
+            log(response);
             setTimeout(() => {
               callback();
               this.updateStatus(true);
