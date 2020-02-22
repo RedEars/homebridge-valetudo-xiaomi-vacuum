@@ -134,31 +134,28 @@ class ValetudoXiaomiVacuum {
     this.services.push(this.batteryService);
 
     this.getConfig(config => {
-      if (!config) {
-      } else {
+      this.log.debug(
+        `Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`
+      );
+      if (this.valetudo_config && this.valetudo_config.spots) {
         this.log.debug(
-          `Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`
+          `Spots retrieved ${JSON.stringify(this.valetudo_config.spots)}`
         );
-        if (this.valetudo_config && this.valetudo_config.spots) {
-          this.log.debug(
-            `Spots retrieved ${JSON.stringify(this.valetudo_config.spots)}`
+        for (
+          let index = 0;
+          index < this.valetudo_config.spots.length;
+          index++
+        ) {
+          const spot = this.valetudo_config.spots[index];
+          this.spotCleanService = new Service.Switch(
+            spot[0] + ", " + this.name,
+            "spotclean"
           );
-          for (
-            let index = 0;
-            index < this.valetudo_config.spots.length;
-            index++
-          ) {
-            const spot = this.valetudo_config.spots[index];
-            this.spotCleanService = new Service.Switch(
-              spot[0] + ", " + this.name,
-              "spotclean"
-            );
-            this.spotCleanService
-              .getCharacteristic(Characteristic.On)
-              .on("set", this.startSpotCleaning.bind(this, spot))
-              .on("get", this.isSpotCleaning.bind(this));
-            this.services.push(this.spotCleanService);
-          }
+          this.spotCleanService
+            .getCharacteristic(Characteristic.On)
+            .on("set", this.startSpotCleaning.bind(this, spot))
+            .on("get", this.isSpotCleaning.bind(this));
+          this.services.push(this.spotCleanService);
         }
       }
     });
