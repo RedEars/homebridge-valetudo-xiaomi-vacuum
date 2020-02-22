@@ -134,11 +134,9 @@ class ValetudoXiaomiVacuum {
     this.services.push(this.batteryService);
 
     this.getConfig(config => {
-      this.log.debug(
-        `Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`
-      );
+      this.log(`Config retrieved 2 ${JSON.stringify(this.valetudo_config)}`);
       if (this.valetudo_config && this.valetudo_config.spots) {
-        this.log.debug(
+        this.log(
           `Spots retrieved ${JSON.stringify(this.valetudo_config.spots)}`
         );
         for (
@@ -190,10 +188,10 @@ class ValetudoXiaomiVacuum {
   }
 
   getConfig(callback) {
-    this.log.debug(`Getting config`);
+    this.log(`Getting config`);
     this.sendJSONRequest("http://" + this.ip + "/api/get_config", "GET")
       .then(response => {
-        this.log.debug(`Config retrieved ${JSON.stringify(response)}`);
+        this.log(`Config retrieved ${JSON.stringify(response)}`);
         this.valetudo_config = response;
         callback(response);
       })
