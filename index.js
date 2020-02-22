@@ -578,8 +578,7 @@ class ValetudoXiaomiVacuum {
     var log = this.log;
 
     if (state) {
-      log.debug("Executing spot cleaning");
-
+      log.debug(`Executing spot cleaning ${spot}`);
       this.sendJSONRequest("http://" + this.ip + "/api/go_to", "PUT", {
         x: spot["x"],
         y: spot["y"]
